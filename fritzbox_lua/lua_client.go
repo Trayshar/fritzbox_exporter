@@ -64,10 +64,11 @@ type LuaPage struct {
 
 // LuaMetricValueDefinition definition for a single metric
 type LuaMetricValueDefinition struct {
-	Path    string
-	Key     string
-	OkValue string
-	Labels  []string
+	Path              string
+	Key               string
+	OkValue           string
+	SkipIfMissingPath string
+	Labels            []string
 }
 
 // LuaMetricValue single value retrieved from lua page
@@ -340,7 +341,7 @@ func GetMetrics(labelRenames *[]LabelRename, data map[string]interface{}, metric
 	var err error
 	if metricDef.Path != "" {
 		pathItems := strings.Split(metricDef.Path, ".")
-		values, err = _getValues(data, pathItems, "")
+		values, err = _getValues(data, pathItems, "", metricDef.SkipIfMissingPath)
 		if err != nil {
 			return nil, err
 		}
@@ -408,6 +409,11 @@ VALUE:
 	}
 
 	if len(metrics) == 0 {
+		// This likely means we tried to access a non-existent metric, shouldn't be an error
+		if metricDef.SkipIfMissingPath != "" && err == nil {
+			return metrics, nil
+		}
+
 		if err == nil {
 			// normal we should already have an error, this is just a fallback
 			err = fmt.Errorf("no value found for item '%s' with key '%s'", metricDef.Path, metricDef.Key)
@@ -442,7 +448,7 @@ func calculatePbkdf2Response(challenge, password string) string {
 }
 
 // helper for retrieving values from parsed JSON
-func _getValues(data interface{}, pathItems []string, parentPath string) ([]interface{}, error) {
+func _getValues(data interface{}, pathItems []string, parentPath string, skipIfMissingPath string) ([]interface{}, error) {
 
 	var err error
 	values := make([]interface{}, 0)
@@ -456,7 +462,7 @@ func _getValues(data interface{}, pathItems []string, parentPath string) ([]inte
 			switch vv := value.(type) {
 			case []interface{}:
 				for index, u := range vv {
-					subvals, err = _getValues(u, pathItems[i+1:], fmt.Sprintf("%s.%d", curPath, index))
+					subvals, err = _getValues(u, pathItems[i+1:], fmt.Sprintf("%s.%d", curPath, index), skipIfMissingPath)
 
 					if subvals != nil {
 						values = append(values, subvals...)
@@ -464,7 +470,7 @@ func _getValues(data interface{}, pathItems []string, parentPath string) ([]inte
 				}
 			case map[string]interface{}:
 				for subK, subV := range vv {
-					subvals, err = _getValues(subV, pathItems[i+1:], fmt.Sprintf("%s.%s", curPath, subK))
+					subvals, err = _getValues(subV, pathItems[i+1:], fmt.Sprintf("%s.%s", curPath, subK), skipIfMissingPath)
 
 					if subvals != nil {
 						values = append(values, subvals...)
@@ -488,6 +494,11 @@ func _getValues(data interface{}, pathItems []string, parentPath string) ([]inte
 		// this is a single value
 		value, err = getValueFromHashOrArray(value, p, curPath)
 		if err != nil {
+			// If this value doesn't exist, do not throw an error but silently ignore it
+			if curPath != "" && skipIfMissingPath != "" && strings.HasPrefix(skipIfMissingPath, curPath) && strings.HasPrefix(err.Error(), "hash '") {
+				return values, nil
+			}
+
 			return nil, err
 		}
 

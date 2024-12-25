@@ -146,14 +146,15 @@ type LuaLabelRename struct {
 // LuaMetric struct
 type LuaMetric struct {
 	// initialized loading JSON
-	Path          string       `json:"path"`
-	Params        string       `json:"params"`
-	ResultPath    string       `json:"resultPath"`
-	ResultKey     string       `json:"resultKey"`
-	OkValue       string       `json:"okValue"`
-	PromDesc      JSONPromDesc `json:"promDesc"`
-	PromType      string       `json:"promType"`
-	CacheEntryTTL int64        `json:"cacheEntryTTL"`
+	Path              string       `json:"path"`
+	Params            string       `json:"params"`
+	ResultPath        string       `json:"resultPath"`
+	ResultKey         string       `json:"resultKey"`
+	SkipIfMissingPath string       `json:"skipIfMissingPath"`
+	OkValue           string       `json:"okValue"`
+	PromDesc          JSONPromDesc `json:"promDesc"`
+	PromType          string       `json:"promType"`
+	CacheEntryTTL     int64        `json:"cacheEntryTTL"`
 
 	// initialized at startup
 	Desc         *prometheus.Desc
@@ -832,10 +833,11 @@ func main() {
 			}
 
 			lm.LuaMetricDef = lua.LuaMetricValueDefinition{
-				Path:    lm.ResultPath,
-				Key:     lm.ResultKey,
-				OkValue: lm.OkValue,
-				Labels:  pd.VarLabels,
+				Path:              lm.ResultPath,
+				Key:               lm.ResultKey,
+				SkipIfMissingPath: lm.SkipIfMissingPath,
+				OkValue:           lm.OkValue,
+				Labels:            pd.VarLabels,
 			}
 
 			// init TTL
