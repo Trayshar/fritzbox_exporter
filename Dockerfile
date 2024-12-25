@@ -2,7 +2,11 @@
 
 # Build Image
 FROM golang:1.23.3-alpine3.20 AS builder
-RUN go install github.com/sberk42/fritzbox_exporter@latest \
+
+WORKDIR /build
+COPY . /build/
+
+RUN go install \
     && mkdir /app \
     && mv /go/bin/fritzbox_exporter /app
 
