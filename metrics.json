@@ -1,5 +1,55 @@
 [
 	{
+		"service": "urn:dslforum-org:service:WLANConfiguration:1",
+		"action": "GetGenericAssociatedDeviceInfo",
+		"actionArgument": {
+			"name": "NewAssociatedDeviceIndex",
+			"isIndex": true,
+			"providerAction": "GetTotalAssociations",
+			"value": "TotalAssociations"
+		},
+		"result": "X_AVM-DE_SignalStrength",
+		"promDesc": {
+			"fqName": "gateway_wlan_client_signal_strengh",
+			"help": "is client signal strenghs",
+			"varLabels": [
+				"AssociatedDeviceIPAddress",
+				"AssociatedDeviceMACAddress",
+				"gateway"
+			],
+			"fixedLabels": {
+				"type": "5GHz"
+			}
+		},
+		"promType": "GaugeValue",
+		"cacheEntryTTL": 60
+	},
+	{
+		"service": "urn:dslforum-org:service:WLANConfiguration:2",
+		"action": "GetGenericAssociatedDeviceInfo",
+		"actionArgument": {
+			"name": "NewAssociatedDeviceIndex",
+			"isIndex": true,
+			"providerAction": "GetTotalAssociations",
+			"value": "TotalAssociations"
+		},
+		"result": "X_AVM-DE_SignalStrength",
+		"promDesc": {
+			"fqName": "gateway_wlan_client_signal_strengh",
+			"help": "is client signal strenghs",
+			"varLabels": [
+				"AssociatedDeviceIPAddress",
+				"AssociatedDeviceMACAddress",
+				"gateway"
+			],
+			"fixedLabels": {
+				"type": "5GHz"
+			}
+		},
+		"promType": "GaugeValue",
+		"cacheEntryTTL": 60
+	},
+	{
 		"service": "urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1",
 		"action": "GetTotalPacketsReceived",
 		"result": "TotalPacketsReceived",
@@ -197,7 +247,7 @@
 			}
 		},
 		"promType": "CounterValue"
-	},	
+	},
 	{
 		"service": "urn:dslforum-org:service:WANCommonInterfaceConfig:1",
 		"action": "GetCommonLinkProperties",
